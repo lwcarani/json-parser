@@ -1,7 +1,78 @@
 import re
+import os
+from pathlib import Path
+import unittest
 
 # load file --> f.read()
-# advance ptr processing string
+# handle incorrect trailing comma
+# expect : to separate key/value pairs
+# advance global ptr when processing string
+# Use test runner pattern from command line like for OAM
+
+
+def parse_string(s: str):
+    res = ""
+    first_char = s[0]
+    last_char = s[-1]
+
+    if first_char != '"' or last_char != '"':
+        return
+
+    for char in s[1:-1]:
+        res += char
+
+    return res
+
+
+def parse_bool_or_null(s: str):
+    match s:
+        case "true":
+            return True
+        case "false":
+            return False
+        case "null":
+            return "null"
+        case _:
+            return
+
+
+def parse_number(s: str):
+    res = ""
+    first_char = s[0]
+    e_counter = 0
+    dot_counter = 0
+    neg_counter = 0
+
+    if not first_char.isdigit() and first_char != "-":
+        return
+
+    for char in s:
+        if char.isdigit():
+            res += char
+        elif char == "e" and e_counter == 0:
+            res += char
+            e_counter += 1
+        elif char == "." and dot_counter == 0:
+            res += char
+            dot_counter += 1
+        elif char == "-" and neg_counter == 0:
+            res += char
+            neg_counter += 1
+        else:
+            return
+
+    return res
+
+
+def parse(s: str):
+    res = parse_string(s)
+
+    if res is None:
+        res = parse_number(s)
+    if res is None:
+        res = parse_bool_or_null(s)
+
+    return res
 
 
 def load(s: str) -> dict:
@@ -24,16 +95,16 @@ def load(s: str) -> dict:
     return result_dict
 
 
-f = open("test_files/step2/invalid.json", "r")
-json_tokens = f.readlines()
-f.close()
-# # json_tokens = [char.upper() for char in [token.strip().split(":") for token in json_tokens]]
-json_tokens
-json_tokens = [token.strip() for token in json_tokens]
+# f = open("test_files/step2/invalid.json", "r")
+# json_tokens = f.readlines()
+# f.close()
+# # # json_tokens = [char.upper() for char in [token.strip().split(":") for token in json_tokens]]
+# json_tokens
 # json_tokens = [token.strip() for token in json_tokens]
-print(json_tokens)
-for token in json_tokens:
-    print(token)
+# # json_tokens = [token.strip() for token in json_tokens]
+# print(json_tokens)
+# for token in json_tokens:
+#     print(token)
 
 
 def lexer(input_file: str) -> int:
@@ -54,7 +125,9 @@ def lexer(input_file: str) -> int:
         print("JSON object cannot be empty.")
         return 1
 
-    if len(json_tokens) > 1 and (json_tokens[0][0] != "{" or json_tokens[-1][0] != "}"):
+    if len(json_tokens) > 1 and (
+        json_tokens[0][0] != "{" or json_tokens[-1][0] != "}"
+    ):
         print("JSON object must start and end with open/closed curly braces.")
         return 1
 
@@ -64,7 +137,10 @@ def lexer(input_file: str) -> int:
                 if char in map_open_close_brackets.values():
                     stack.append(char)
                 elif char in map_open_close_brackets.keys():
-                    if len(stack) == 0 or stack.pop() != map_open_close_brackets[char]:
+                    if (
+                        len(stack) == 0
+                        or stack.pop() != map_open_close_brackets[char]
+                    ):
                         print(
                             "JSON object contains mismatched brackets ([], (), or {})"
                         )
@@ -75,7 +151,11 @@ def lexer(input_file: str) -> int:
 
     # TODO - add a counter / check to see if last elements in JSON so we know that there shouldn't be trailing commas
     for i, sub_tokens in enumerate(json_tokens):
-        if len(sub_tokens) == 1 and sub_tokens[0] == "{" or sub_tokens[0] == "}":
+        if (
+            len(sub_tokens) == 1
+            and sub_tokens[0] == "{"
+            or sub_tokens[0] == "}"
+        ):
             continue
 
         if i == len(json_tokens) - 1:
