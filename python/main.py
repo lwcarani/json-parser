@@ -57,7 +57,7 @@ def parse_number(s: str):
         else:
             return
 
-    return res
+    return float(res)
 
 
 def parse(s: str):
