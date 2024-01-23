@@ -4,48 +4,114 @@ from parameterized.parameterized import parameterized
 import os
 
 from main import (
+    parse,
     parse_string,
+    parse_number,
+    parse_bool_or_null,
 )
 
 
 class TestPyLispInterpreter(TestCase):
     """Test json-parser functionality."""
 
-    # @parameterized.expand(
-    #     [
-    #         [os.path.join("test_files", "step1", "invalid1.json"), 1],
-    #         [os.path.join("test_files", "step1", "invalid2.json"), 1],
-    #         [os.path.join("test_files", "step1", "invalid3.json"), 1],
-    #         [os.path.join("test_files", "step1", "invalid4.json"), 1],
-    #         [os.path.join("test_files", "step1", "invalid5.json"), 1],
-    #         [os.path.join("test_files", "step1", "valid1.json"), 0],
-    #     ]
-    # )
-    # def test_step1(self, input_file_path: str, expected_result: int) -> None:
-    #     res: int = lexer(input_file_path)
-    #     self.assertEqual(res, expected_result)
-
-    # @parameterized.expand(
-    #     [
-    #         [os.path.join("test_files", "step2", "invalid.json"), 1],
-    #         [os.path.join("test_files", "step2", "invalid2.json"), 1],
-    #         [os.path.join("test_files", "step2", "invalid3.json"), 1],
-    #         [os.path.join("test_files", "step2", "valid.json"), 0],
-    #         [os.path.join("test_files", "step2", "valid2.json"), 0],
-    #     ]
-    # )
-    # def test_step2(self, input_file_path: str, expected_result: int) -> None:
-    #     res: int = lexer(input_file_path)
-    #     self.assertEqual(res, expected_result)
-
     @parameterized.expand(
         [
             ['"hello world"', "hello world"],
-            [5, None],
+            ['"hello world', None],
+            ["hello world", None],
+            ['hello world"', None],
+            ["5", None],
+            ["5.55", None],
+            ["1e9", None],
+            ["-5", None],
         ]
     )
     def test_parse_string(self, s: str, expected_result: str | None) -> None:
         res: str | None = parse_string(s)
+        self.assertEqual(res, expected_result)
+
+    @parameterized.expand(
+        [
+            ['"hello world"', None],
+            ['"hello world', None],
+            ["hello world", None],
+            ['hello world"', None],
+            ["5", "5"],
+            ["5.55", "5.55"],
+            ["5.5.55", None],
+            ["5.5.5..5", None],
+            [".5.5.55..", None],
+            ["+6", None],
+            ["1e9", "1e9"],
+            ["1eee9", None],
+            ["1e9e", None],
+            ["-5", "-5"],
+        ]
+    )
+    def test_parse_number(self, s: str, expected_result: str | None) -> None:
+        res: str | None = parse_number(s)
+        self.assertEqual(res, expected_result)
+
+    @parameterized.expand(
+        [
+            ['"hello world"', None],
+            ['"hello world', None],
+            ["hello world", None],
+            ['hello world"', None],
+            ["5.5.55", None],
+            ["5.5.5..5", None],
+            [".5.5.55..", None],
+            ["+6", None],
+            ["1eee9", None],
+            ["true", True],
+            ["false", False],
+            ["True", None],
+            ["False", None],
+            ["null", "null"],
+            ["Null", None],
+            ["None", None],
+            ["NONE", None],
+            ["nan", None],
+            ["NaN", None],
+        ]
+    )
+    def test_parse_bool_or_null(
+        self, s: str, expected_result: str | None
+    ) -> None:
+        res: str | None = parse_bool_or_null(s)
+        self.assertEqual(res, expected_result)
+
+    @parameterized.expand(
+        [
+            ['"hello world"', "hello world"],
+            ['"hello world', None],
+            ["hello world", None],
+            ['hello world"', None],
+            ["5", "5"],
+            ["5.55", "5.55"],
+            ["5.5.55..", None],
+            ["..5.5.55", None],
+            ["+6", None],
+            ["1e9", "1e9"],
+            ["1eee9", None],
+            ["1e9e", None],
+            ["-5", "-5"],
+            ["true", True],
+            ["false", False],
+            ['"true"', "true"],
+            ['"false"', "false"],
+            ["True", None],
+            ["False", None],
+            ["null", "null"],
+            ["Null", None],
+            ["None", None],
+            ["NONE", None],
+            ["nan", None],
+            ["NaN", None],
+        ]
+    )
+    def test_parse(self, s: str, expected_result: str | None) -> None:
+        res: str | None = parse(s)
         self.assertEqual(res, expected_result)
 
 
