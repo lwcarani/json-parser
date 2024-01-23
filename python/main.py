@@ -39,8 +39,7 @@ def parse_bool_or_null(s: str):
 def parse_number(s: str):
     res = ""
     first_char = s[0]
-    e_counter = 0
-    dot_counter = 0
+    e_or_dot_counter = 0
     neg_counter = 0
 
     if not first_char.isdigit() and first_char != "-":
@@ -49,12 +48,9 @@ def parse_number(s: str):
     for char in s:
         if char.isdigit():
             res += char
-        elif char == "e" and e_counter == 0:
+        elif char in {"e", "."} and e_or_dot_counter == 0:
             res += char
-            e_counter += 1
-        elif char == "." and dot_counter == 0:
-            res += char
-            dot_counter += 1
+            e_or_dot_counter += 1
         elif char == "-" and neg_counter == 0:
             res += char
             neg_counter += 1
