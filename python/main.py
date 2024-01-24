@@ -10,6 +10,12 @@ import unittest
 # Use test runner pattern from command line like for OAM
 
 
+def skip_whitespace(s: str):
+    for i, char in enumerate(s):
+        if char not in [" ", "\n", "\t", "\r"]:
+            return s[i:]
+
+
 def parse_string(s: str):
     res = ""
     first_char = s[0]
@@ -67,6 +73,16 @@ def parse(s: str):
         res = parse_number(s)
     if res is None:
         res = parse_bool_or_null(s)
+
+    return res
+
+
+def parse_json(file_path: str) -> dict:
+    f = open("valid.json", "r")
+    j = f.read()
+    f.close()
+
+    res: dict = parse(j)
 
     return res
 
