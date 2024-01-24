@@ -16,16 +16,31 @@ def skip_whitespace(s: str):
             return s[i:]
 
 
+def parse_object(s: str):
+    return
+
+
+def parse_array(s: str):
+    return
+
+
 def parse_string(s: str):
     res = ""
-    first_char = s[0]
-    last_char = s[-1]
 
-    if first_char != '"' or last_char != '"':
+    if s[0] != '"':
         return
 
-    for char in s[1:-1]:
+    ptr = 1
+
+    while s[ptr] != '"':
+        char = s[ptr]
         res += char
+
+        ptr += 1
+
+        # haven't encountered close quotes, return None
+        if ptr >= len(s):
+            return
 
     return res
 
@@ -73,6 +88,10 @@ def parse(s: str):
         res = parse_number(s)
     if res is None:
         res = parse_bool_or_null(s)
+    if res is None:
+        res = parse_object(s)
+    if res is None:
+        res = parse_array(s)
 
     return res
 
