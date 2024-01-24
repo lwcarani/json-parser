@@ -8,6 +8,7 @@ from main import (
     parse_string,
     parse_number,
     parse_bool_or_null,
+    skip_whitespace,
 )
 
 
@@ -28,6 +29,21 @@ class TestPyLispInterpreter(TestCase):
     )
     def test_parse_string(self, s: str, expected_result: str | None) -> None:
         res: str | None = parse_string(s)
+        self.assertEqual(res, expected_result)
+
+    @parameterized.expand(
+        [
+            ["       hello", "hello"],
+            ["       hello   ", "hello   "],
+            ["    \n   \n\t\t\t   hello ", "hello "],
+            ["       hello ", "hello "],
+            ["    \r\t    \n     \t    \n\n\n\n\n\n\n\n\n\n   hello", "hello"],
+            ["       hello\n\n\n", "hello\n\n\n"],
+            ["\nhello\n\n\n", "hello\n\n\n"],
+        ]
+    )
+    def test_skip_whitespace(self, s: str, expected_result: str) -> None:
+        res: str = skip_whitespace(s)
         self.assertEqual(res, expected_result)
 
     @parameterized.expand(
