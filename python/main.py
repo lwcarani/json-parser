@@ -10,100 +10,157 @@ import unittest
 # Use test runner pattern from command line like for OAM
 
 
-def skip_whitespace(s: str):
-    for i, char in enumerate(s):
-        if char not in [" ", "\n", "\t", "\r"]:
-            return s[i:]
+class JsonParser(object):
+    def __init__(self, s: str = ""):
+        self.ptr = 0
+        self.s = s
+        self.json_dict = {}
 
+    def skip_whitespace(self):
+        self.ptr = 0
+        for char in self.s:
+            if char in [" ", "\n", "\t", "\r"]:
+                self.ptr += 1
+            else:
+                break
 
-def parse_object(s: str):
-    return
+        self.s = self.s[self.ptr :]
 
+    def parse_comma(self):
+        if self.s[0] != ",":
+            return
 
-def parse_array(s: str):
-    return
+        self.s = self.s[1:]
+        self.skip_whitespace()
 
+        if self.s[0] == "}":
+            raise SyntaxError("Trailing commas are not allowed.")
 
-def parse_string(s: str):
-    res = ""
+    def parse_colon(self):
+        if self.s[0] != ":":
+            return
 
-    if s[0] != '"':
+        self.s = self.s[1:]
+        self.skip_whitespace()
+
+    # add depth param to track nested objects
+    def parse_object(self):
+        self.skip_whitespace()
+
+        if self.s[0] != "{":
+            return
+
+        self.s = self.s[1:]
+        self.skip_whitespace()
+
+        while self.s[0] != "}":
+            key = self.parse_item()
+            self.skip_whitespace()
+            self.parse_colon()
+            val = self.parse_item()
+            self.skip_whitespace()
+            self.parse_comma()
+            self.json_dict[key] = val
+
+    def parse_array(self):
         return
 
-    ptr = 1
+    def parse_string(self):
+        res = ""
 
-    while s[ptr] != '"':
-        char = s[ptr]
-        res += char
-
-        ptr += 1
-
-        # haven't encountered close quotes, return None
-        if ptr >= len(s):
+        if self.s[0] != '"':
             return
 
-    return res
+        # TODO - better management of global ptr
+        self.ptr = 1
 
+        while self.s[self.ptr] != '"':
+            char = self.s[self.ptr]
+            res += char
+            self.ptr += 1
 
-def parse_bool_or_null(s: str):
-    match s:
-        case "true":
-            return True
-        case "false":
-            return False
-        case "null":
-            return "null"
-        case _:
+            # haven't encountered close quotes, return None
+            if self.ptr >= len(self.s):
+                return
+
+        # advance ptr on input string json
+        self.s = self.s[self.ptr + 1 :]
+
+        return res
+
+    def parse_reserved_word(self, reserved_word: str):
+        match reserved_word:
+            case "true":
+                self.s = self.s[len(reserved_word) :]
+                return True
+            case "false":
+                self.s = self.s[len(reserved_word) :]
+                return False
+            case "null":
+                self.s = self.s[len(reserved_word) :]
+                return "null"
+            case _:
+                return
+
+    def parse_number(self):
+        res = ""
+        first_char = self.s[0]
+        e_or_dot_counter = 0
+        neg_counter = 0
+        self.ptr = 0
+
+        if not first_char.isdigit() and first_char != "-":
             return
 
+        for char in self.s:
+            if char.isdigit():
+                res += char
+                self.ptr += 1
+            elif char in {"e", "."} and e_or_dot_counter == 0:
+                res += char
+                e_or_dot_counter += 1
+                self.ptr += 1
+            elif char == "-" and neg_counter == 0:
+                res += char
+                neg_counter += 1
+                self.ptr += 1
+            elif char in ["}", ",", "]"]:
+                # advance ptr on input string json
+                self.s = self.s[self.ptr :]
+                return int(float(res)) if float(res) % 1 == 0 else float(res)
+            else:
+                return
 
-def parse_number(s: str):
-    res = ""
-    first_char = s[0]
-    e_or_dot_counter = 0
-    neg_counter = 0
+        # advance ptr on input string json
+        self.s = self.s[self.ptr :]
+        return int(float(res)) if float(res) % 1 == 0 else float(res)
 
-    if not first_char.isdigit() and first_char != "-":
-        return
+    def parse_item(self):
+        item = self.parse_string()
 
-    for char in s:
-        if char.isdigit():
-            res += char
-        elif char in {"e", "."} and e_or_dot_counter == 0:
-            res += char
-            e_or_dot_counter += 1
-        elif char == "-" and neg_counter == 0:
-            res += char
-            neg_counter += 1
-        else:
-            return
+        if item is None:
+            item = self.parse_number()
+        # if item is None:
+        #     item = self.parse_reserved_word()
+        if item is None:
+            item = self.parse_object()
+        if item is None:
+            item = self.parse_array()
 
-    return float(res)
+        return item
 
+    def parse_json(self, s: str, kind: str) -> dict:
+        if kind == "file_path":
+            f = open(s, "r")
+            self.s = f.read()
+            f.close()
+        if kind == "str":
+            self.s = s
 
-def parse(s: str):
-    res = parse_string(s)
+        self.skip_whitespace()
+        self.parse_item()
 
-    if res is None:
-        res = parse_number(s)
-    if res is None:
-        res = parse_bool_or_null(s)
-    if res is None:
-        res = parse_object(s)
-    if res is None:
-        res = parse_array(s)
-
-    return res
-
-
-def parse_json(file_path: str) -> dict:
-    f = open("valid.json", "r")
-    j = f.read()
-    f.close()
-
-    res: dict = parse(j)
-
-    return res
+        return self.json_dict
 
 
 def load(s: str) -> dict:
