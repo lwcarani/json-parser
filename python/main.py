@@ -16,8 +16,10 @@ class JsonParser(object):
         self.s = s
         self.json_dict = {}
 
-    def skip_whitespace(self):
+    def reset_ptr(self):
         self.ptr = 0
+
+    def skip_whitespace(self):
         for char in self.s:
             if char in [" ", "\n", "\t", "\r"]:
                 self.ptr += 1
@@ -25,6 +27,8 @@ class JsonParser(object):
                 break
 
         self.s = self.s[self.ptr :]
+
+        self.reset_ptr()
 
     def parse_comma(self):
         if self.s[0] != ",":
@@ -45,6 +49,8 @@ class JsonParser(object):
 
     # add depth param to track nested objects
     def parse_object(self):
+        # TODO - add code to check for comma after the final closing bracket fo the JSON
+        # add code to check for nested objects
         self.skip_whitespace()
 
         if self.s[0] != "{":
@@ -62,6 +68,7 @@ class JsonParser(object):
             self.parse_comma()
             self.json_dict[key] = val
 
+    # TODO
     def parse_array(self):
         return
 
@@ -71,8 +78,7 @@ class JsonParser(object):
         if self.s[0] != '"':
             return
 
-        # TODO - better management of global ptr
-        self.ptr = 1
+        self.ptr += 1
 
         while self.s[self.ptr] != '"':
             char = self.s[self.ptr]
@@ -81,33 +87,33 @@ class JsonParser(object):
 
             # haven't encountered close quotes, return None
             if self.ptr >= len(self.s):
-                return
+                raise SyntaxError("String is missing close quote")
 
         # advance ptr on input string json
         self.s = self.s[self.ptr + 1 :]
 
+        self.reset_ptr()
+
         return res
 
-    def parse_reserved_word(self, reserved_word: str):
-        match reserved_word:
-            case "true":
-                self.s = self.s[len(reserved_word) :]
-                return True
-            case "false":
-                self.s = self.s[len(reserved_word) :]
-                return False
-            case "null":
-                self.s = self.s[len(reserved_word) :]
-                return "null"
-            case _:
-                return
+    def parse_reserved_word(self):
+        if self.s[:4] == "true":
+            self.s = self.s[len("true") :]
+            return True
+        elif self.s[:5] == "false":
+            self.s = self.s[len("false") :]
+            return False
+        elif self.s[:4] == "null":
+            self.s = self.s[len("null") :]
+            return "null"
+        else:
+            return
 
     def parse_number(self):
         res = ""
         first_char = self.s[0]
         e_or_dot_counter = 0
         neg_counter = 0
-        self.ptr = 0
 
         if not first_char.isdigit() and first_char != "-":
             return
@@ -127,12 +133,15 @@ class JsonParser(object):
             elif char in ["}", ",", "]"]:
                 # advance ptr on input string json
                 self.s = self.s[self.ptr :]
+                self.reset_ptr()
                 return int(float(res)) if float(res) % 1 == 0 else float(res)
             else:
+                self.reset_ptr()
                 return
 
         # advance ptr on input string json
         self.s = self.s[self.ptr :]
+        self.reset_ptr()
         return int(float(res)) if float(res) % 1 == 0 else float(res)
 
     def parse_item(self):
@@ -140,8 +149,8 @@ class JsonParser(object):
 
         if item is None:
             item = self.parse_number()
-        # if item is None:
-        #     item = self.parse_reserved_word()
+        if item is None:
+            item = self.parse_reserved_word()
         if item is None:
             item = self.parse_object()
         if item is None:
@@ -213,9 +222,7 @@ def lexer(input_file: str) -> int:
         print("JSON object cannot be empty.")
         return 1
 
-    if len(json_tokens) > 1 and (
-        json_tokens[0][0] != "{" or json_tokens[-1][0] != "}"
-    ):
+    if len(json_tokens) > 1 and (json_tokens[0][0] != "{" or json_tokens[-1][0] != "}"):
         print("JSON object must start and end with open/closed curly braces.")
         return 1
 
@@ -225,10 +232,7 @@ def lexer(input_file: str) -> int:
                 if char in map_open_close_brackets.values():
                     stack.append(char)
                 elif char in map_open_close_brackets.keys():
-                    if (
-                        len(stack) == 0
-                        or stack.pop() != map_open_close_brackets[char]
-                    ):
+                    if len(stack) == 0 or stack.pop() != map_open_close_brackets[char]:
                         print(
                             "JSON object contains mismatched brackets ([], (), or {})"
                         )
@@ -239,11 +243,7 @@ def lexer(input_file: str) -> int:
 
     # TODO - add a counter / check to see if last elements in JSON so we know that there shouldn't be trailing commas
     for i, sub_tokens in enumerate(json_tokens):
-        if (
-            len(sub_tokens) == 1
-            and sub_tokens[0] == "{"
-            or sub_tokens[0] == "}"
-        ):
+        if len(sub_tokens) == 1 and sub_tokens[0] == "{" or sub_tokens[0] == "}":
             continue
 
         if i == len(json_tokens) - 1:
