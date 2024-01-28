@@ -8,13 +8,14 @@ import unittest
 # expect : to separate key/value pairs
 # advance global ptr when processing string
 # Use test runner pattern from command line like for OAM
+# TODO - have main just be loading json from input path, or running tests, return 0 or 1
+# TODO - create separate file for Json Parser class
 
 
 class JsonParser(object):
     def __init__(self, s: str = ""):
         self.ptr = 0
         self.s = s
-        self.json_dict = {}
 
     def reset_ptr(self):
         self.ptr = 0
@@ -49,6 +50,7 @@ class JsonParser(object):
 
     # add depth param to track nested objects
     def parse_object(self):
+        res = {}
         # TODO - add code to check for comma after the final closing bracket fo the JSON
         # add code to check for nested objects
         self.skip_whitespace()
@@ -64,9 +66,16 @@ class JsonParser(object):
             self.skip_whitespace()
             self.parse_colon()
             val = self.parse_item()
+
+            # TODO - make this more general?
+            if isinstance(val, dict):
+                self.s = self.s[1:]
+
             self.skip_whitespace()
             self.parse_comma()
-            self.json_dict[key] = val
+            res[key] = val
+
+        return res
 
     # TODO
     def parse_array(self):
@@ -167,9 +176,9 @@ class JsonParser(object):
             self.s = s
 
         self.skip_whitespace()
-        self.parse_item()
+        res = self.parse_item()
 
-        return self.json_dict
+        return res
 
 
 def load(s: str) -> dict:

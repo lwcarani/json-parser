@@ -12,6 +12,7 @@ class TestPyLispInterpreter(TestCase):
     @parameterized.expand(
         [
             ['    {"key1": "value1"}', {"key1": "value1"}],
+            ["{}", {}],
             ['    {  "key1"   :    "value1"}', {"key1": "value1"}],
             [
                 '    \n\n{\n\n    \n\t\t    "key1": "value1"}',
@@ -29,12 +30,44 @@ class TestPyLispInterpreter(TestCase):
             ['{"key1": false}', {"key1": False}],
             ['{"key1": true}', {"key1": True}],
             ['{"key1": "true"}', {"key1": "true"}],
+            ['{"key1": "true", "key2": false}', {"key1": "true", "key2": False}],
+            [
+                '{"key1": "true", "key2": false, "key3": 42, "key4": {}}',
+                {"key1": "true", "key2": False, "key3": 42, "key4": {}},
+            ],
+            [
+                '{"key1": "true", "key2": false, "key3": 42, "key4": {"k": "v", "k32": 56}}',
+                {
+                    "key1": "true",
+                    "key2": False,
+                    "key3": 42,
+                    "key4": {"k": "v", "k32": 56},
+                },
+            ],
+            [
+                '{"key1": "true", "key2": {"k": 5}, "key3": 42, "key4": {}}',
+                {
+                    "key1": "true",
+                    "key2": {"k": 5},
+                    "key3": 42,
+                    "key4": {},
+                },
+            ],
+            [
+                '{"key1": "true", "key2": {}, "key3": 42, "key4": {}}',
+                {
+                    "key1": "true",
+                    "key2": {},
+                    "key3": 42,
+                    "key4": {},
+                },
+            ],
         ]
     )
     def test_parse_object(self, s: str, expected_result: dict) -> None:
         js = JsonParser(s)
-        js.parse_object()
-        self.assertEqual(js.json_dict, expected_result)
+        res = js.parse_object()
+        self.assertEqual(res, expected_result)
 
     @parameterized.expand(
         [
