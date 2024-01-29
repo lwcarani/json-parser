@@ -1,9 +1,7 @@
 import unittest
 from unittest import TestCase
 from parameterized.parameterized import parameterized
-import os
-
-from main import JsonParser
+from json_parser import JsonParser
 
 
 class TestPyLispInterpreter(TestCase):
@@ -69,10 +67,24 @@ class TestPyLispInterpreter(TestCase):
     def test_parse_object(
         self, s: str, expected_result: dict, remaining_str: str
     ) -> None:
-        js = JsonParser(s)
-        res = js.parse_object()
+        jp = JsonParser(s)
+        res = jp.parse_object()
         self.assertEqual(res, expected_result)
-        self.assertEqual(remaining_str, js.s)
+        self.assertEqual(remaining_str, jp.s)
+
+    @parameterized.expand(
+        [
+            ['{"key1": value1"}'],
+            ['{"key1": 5.5.5..5}'],
+            ['{"key1": .5.5.55..}'],
+            ['{"key1": +6}'],
+        ]
+    )
+    def test_raise_unable_parse_key_or_value(self, s: str):
+        jp = JsonParser(s)
+        with self.assertRaises(SyntaxError) as context:
+            jp.parse_object()
+        self.assertEqual(str(context.exception), "Key or value unable to be parsed.")
 
     @parameterized.expand(
         [
@@ -81,10 +93,10 @@ class TestPyLispInterpreter(TestCase):
         ]
     )
     def test_raise_missing_close_quote_error(self, s: str):
-        js = JsonParser(s)
+        jp = JsonParser(s)
         with self.assertRaises(SyntaxError) as context:
-            js.parse_string()
-        self.assertEqual(str(context.exception), "String is missing close quote")
+            jp.parse_string()
+        self.assertEqual(str(context.exception), "String is missing close quote.")
 
     @parameterized.expand(
         [
@@ -96,9 +108,9 @@ class TestPyLispInterpreter(TestCase):
         ]
     )
     def test_raise_trailing_comma_error(self, s: str):
-        js = JsonParser(s)
+        jp = JsonParser(s)
         with self.assertRaises(SyntaxError) as context:
-            js.parse_object()
+            jp.parse_object()
         self.assertEqual(str(context.exception), "Trailing commas are not allowed.")
 
     @parameterized.expand(
@@ -122,10 +134,10 @@ class TestPyLispInterpreter(TestCase):
     def test_parse_string(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
-        js = JsonParser(s)
-        res = js.parse_string()
+        jp = JsonParser(s)
+        res = jp.parse_string()
         self.assertEqual(res, expected_result)
-        self.assertEqual(remaining_str, js.s)
+        self.assertEqual(remaining_str, jp.s)
 
     @parameterized.expand(
         [
@@ -150,10 +162,10 @@ class TestPyLispInterpreter(TestCase):
     def test_parse_array(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
-        js = JsonParser(s)
-        res = js.parse_array()
+        jp = JsonParser(s)
+        res = jp.parse_array()
         self.assertEqual(res, expected_result)
-        self.assertEqual(remaining_str, js.s)
+        self.assertEqual(remaining_str, jp.s)
 
     @parameterized.expand(
         [
@@ -173,9 +185,9 @@ class TestPyLispInterpreter(TestCase):
         ]
     )
     def test_skip_whitespace(self, s: str, expected_result: str) -> None:
-        js = JsonParser(s)
-        js.skip_whitespace()
-        self.assertEqual(js.s, expected_result)
+        jp = JsonParser(s)
+        jp.skip_whitespace()
+        self.assertEqual(jp.s, expected_result)
 
     @parameterized.expand(
         [
@@ -195,9 +207,9 @@ class TestPyLispInterpreter(TestCase):
         ]
     )
     def test_parse_comma(self, s: str, expected_result: str) -> None:
-        js = JsonParser(s)
-        js.parse_comma()
-        self.assertEqual(js.s, expected_result)
+        jp = JsonParser(s)
+        jp.parse_comma()
+        self.assertEqual(jp.s, expected_result)
 
     @parameterized.expand(
         [
@@ -217,9 +229,9 @@ class TestPyLispInterpreter(TestCase):
         ]
     )
     def test_parse_colon(self, s: str, expected_result: str) -> None:
-        js = JsonParser(s)
-        js.parse_colon()
-        self.assertEqual(js.s, expected_result)
+        jp = JsonParser(s)
+        jp.parse_colon()
+        self.assertEqual(jp.s, expected_result)
 
     @parameterized.expand(
         [
@@ -246,10 +258,10 @@ class TestPyLispInterpreter(TestCase):
     def test_parse_number(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
-        js = JsonParser(s)
-        res = js.parse_number()
+        jp = JsonParser(s)
+        res = jp.parse_number()
         self.assertEqual(res, expected_result)
-        self.assertEqual(remaining_str, js.s)
+        self.assertEqual(remaining_str, jp.s)
 
     @parameterized.expand(
         [
@@ -277,10 +289,10 @@ class TestPyLispInterpreter(TestCase):
     def test_parse_reserved_word(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
-        js = JsonParser(s)
-        res = js.parse_reserved_word()
+        jp = JsonParser(s)
+        res = jp.parse_reserved_word()
         self.assertEqual(res, expected_result)
-        self.assertEqual(remaining_str, js.s)
+        self.assertEqual(remaining_str, jp.s)
 
     @parameterized.expand(
         [
@@ -289,13 +301,6 @@ class TestPyLispInterpreter(TestCase):
             ["false\t\n", False, "\t\n"],
             ["5", 5, ""],
             ["5.55", 5.55, ""],
-            [
-                "5.5.5..5",
-                None,
-                "5.5.5..5",
-            ],
-            [".5.5.55..", None, ".5.5.55.."],
-            ["+6", None, "+6"],
             ["1e9", 1e9, ""],
             ['-213431e9, "key2": ', -213431e9, ', "key2": '],
             ["1445e93232", 1445e93232, ""],
@@ -310,10 +315,10 @@ class TestPyLispInterpreter(TestCase):
     def test_parse_item(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
-        js = JsonParser(s)
-        res = js.parse_item()
+        jp = JsonParser(s)
+        res = jp.parse_item()
         self.assertEqual(res, expected_result)
-        self.assertEqual(remaining_str, js.s)
+        self.assertEqual(remaining_str, jp.s)
 
 
 if __name__ == "__main__":

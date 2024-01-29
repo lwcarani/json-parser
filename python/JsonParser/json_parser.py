@@ -1,9 +1,13 @@
-# load file --> f.read()
-# handle incorrect trailing comma
-# expect : to separate key/value pairs
-# advance global ptr when processing string
-# Use test runner pattern from command line like for OAM
-# TODO - have main just be loading json from input path, or running tests, return 0 or 1
+import os
+from enum import Enum
+
+WHITESPACE = [" ", "\n", "\t", "\r"]
+
+
+class ReservedWords(Enum):
+    TRUE = "true"
+    FALSE = "false"
+    NULL = "null"
 
 
 class JsonParser(object):
@@ -16,7 +20,7 @@ class JsonParser(object):
 
     def skip_whitespace(self):
         for char in self.s:
-            if char in [" ", "\n", "\t", "\r"]:
+            if char in WHITESPACE:
                 self.ptr += 1
             else:
                 break
@@ -44,8 +48,6 @@ class JsonParser(object):
 
     def parse_object(self):
         res = {}
-        # TODO - add code to check for comma after the final closing bracket fo the JSON
-        # add code to check for nested objects
         self.skip_whitespace()
 
         if self.s[0] != "{":
@@ -70,8 +72,6 @@ class JsonParser(object):
 
     def parse_array(self):
         res = []
-        # TODO - add code to check for comma after the final closing bracket fo the JSON
-        # add code to check for nested objects
         self.skip_whitespace()
 
         if self.s[0] != "[":
@@ -106,7 +106,7 @@ class JsonParser(object):
 
             # haven't encountered close quotes, return None
             if self.ptr >= len(self.s):
-                raise SyntaxError("String is missing close quote")
+                raise SyntaxError("String is missing close quote.")
 
         # advance ptr on input string json
         self.s = self.s[self.ptr + 1 :]
@@ -116,15 +116,15 @@ class JsonParser(object):
         return res
 
     def parse_reserved_word(self):
-        if self.s[:4] == "true":
-            self.s = self.s[len("true") :]
+        if self.s[:4] == ReservedWords.TRUE.value:
+            self.s = self.s[len(ReservedWords.TRUE.value) :]
             return True
-        elif self.s[:5] == "false":
-            self.s = self.s[len("false") :]
+        elif self.s[:5] == ReservedWords.FALSE.value:
+            self.s = self.s[len(ReservedWords.FALSE.value) :]
             return False
-        elif self.s[:4] == "null":
-            self.s = self.s[len("null") :]
-            return "null"
+        elif self.s[:4] == ReservedWords.NULL.value:
+            self.s = self.s[len(ReservedWords.NULL.value) :]
+            return ReservedWords.NULL.value
         else:
             return
 
@@ -149,7 +149,7 @@ class JsonParser(object):
                 res += char
                 neg_counter += 1
                 self.ptr += 1
-            elif char in ["}", ",", "]"]:
+            elif char in WHITESPACE + ["}", ",", "]"]:
                 # advance ptr on input string json
                 self.s = self.s[self.ptr :]
                 self.reset_ptr()
@@ -174,15 +174,17 @@ class JsonParser(object):
             item = self.parse_object()
         if item is None:
             item = self.parse_array()
+        if item is None:
+            raise SyntaxError("Key or value unable to be parsed.")
 
         return item
 
-    def parse_json(self, s: str, kind: str) -> dict:
-        if kind == "file_path":
+    def parse_json(self, s: str) -> dict:
+        if os.path.exists(s):
             f = open(s, "r")
             self.s = f.read()
             f.close()
-        if kind == "str":
+        else:
             self.s = s
 
         self.skip_whitespace()

@@ -1,0 +1,27 @@
+{
+  "key": "value",
+  "key-n": 101,
+  "key-o": {
+    "inner key": "inner value",
+    "inner key 2": 42,
+    "inner key 3": {
+      "inner inner key": 17
+    }
+  },
+  "key-l": [
+    "list value",
+    1,
+    2,
+    3,
+    [
+      "a",
+      "b",
+      "c"
+    ],
+    42,
+    14,
+    false,
+    true,
+    null
+  ]
+}
