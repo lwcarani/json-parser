@@ -11,29 +11,28 @@ class TestPyLispInterpreter(TestCase):
 
     @parameterized.expand(
         [
-            ['    {"key1": "value1"}', {"key1": "value1"}],
-            ["{}", {}],
-            ['    {  "key1"   :    "value1"}', {"key1": "value1"}],
-            [
-                '    \n\n{\n\n    \n\t\t    "key1": "value1"}',
-                {"key1": "value1"},
-            ],
-            ['{"key1": "value1"}', {"key1": "value1"}],
-            ['{"key1": 5}', {"key1": 5}],
-            ['{"key1": 5, "key2": 12e90}', {"key1": 5, "key2": 12e90}],
+            ['    {"key1": "value1"}', {"key1": "value1"}, ""],
+            ["{}", {}, ""],
+            ['    {  "key1"   :    "value1"}', {"key1": "value1"}, ""],
+            ['    \n\n{\n\n    \n\t\t    "key1": "value1"}', {"key1": "value1"}, ""],
+            ['{"key1": "value1"}', {"key1": "value1"}, ""],
+            ['{"key1": 5}', {"key1": 5}, ""],
+            ['{"key1": 5, "key2": 12e90}', {"key1": 5, "key2": 12e90}, ""],
             [
                 '{"key1": 5, "key2": true, "key3": false, "key4": null}',
                 {"key1": 5, "key2": True, "key3": False, "key4": "null"},
+                "",
             ],
-            ['{"key1": "5"}', {"key1": "5"}],
-            ['{"key1": null}', {"key1": "null"}],
-            ['{"key1": false}', {"key1": False}],
-            ['{"key1": true}', {"key1": True}],
-            ['{"key1": "true"}', {"key1": "true"}],
-            ['{"key1": "true", "key2": false}', {"key1": "true", "key2": False}],
+            ['{"key1": "5"}', {"key1": "5"}, ""],
+            ['{"key1": null}', {"key1": "null"}, ""],
+            ['{"key1": false}', {"key1": False}, ""],
+            ['{"key1": true}', {"key1": True}, ""],
+            ['{"key1": "true"}', {"key1": "true"}, ""],
+            ['{"key1": "true", "key2": false}', {"key1": "true", "key2": False}, ""],
             [
                 '{"key1": "true", "key2": false, "key3": 42, "key4": {}}',
                 {"key1": "true", "key2": False, "key3": 42, "key4": {}},
+                "",
             ],
             [
                 '{"key1": "true", "key2": false, "key3": 42, "key4": {"k": "v", "k32": 56}}',
@@ -43,6 +42,7 @@ class TestPyLispInterpreter(TestCase):
                     "key3": 42,
                     "key4": {"k": "v", "k32": 56},
                 },
+                "",
             ],
             [
                 '{"key1": "true", "key2": {"k": 5}, "key3": 42, "key4": {}}',
@@ -52,6 +52,7 @@ class TestPyLispInterpreter(TestCase):
                     "key3": 42,
                     "key4": {},
                 },
+                "",
             ],
             [
                 '{"key1": "true", "key2": {}, "key3": 42, "key4": {}}',
@@ -61,13 +62,17 @@ class TestPyLispInterpreter(TestCase):
                     "key3": 42,
                     "key4": {},
                 },
+                "",
             ],
         ]
     )
-    def test_parse_object(self, s: str, expected_result: dict) -> None:
+    def test_parse_object(
+        self, s: str, expected_result: dict, remaining_str: str
+    ) -> None:
         js = JsonParser(s)
         res = js.parse_object()
         self.assertEqual(res, expected_result)
+        self.assertEqual(remaining_str, js.s)
 
     @parameterized.expand(
         [
@@ -119,6 +124,34 @@ class TestPyLispInterpreter(TestCase):
     ) -> None:
         js = JsonParser(s)
         res = js.parse_string()
+        self.assertEqual(res, expected_result)
+        self.assertEqual(remaining_str, js.s)
+
+    @parameterized.expand(
+        [
+            ["[1, 2, 3]", [1, 2, 3], ""],
+            [
+                '["a", "b", "C", "D", "eeee"], foo bar foo',
+                ["a", "b", "C", "D", "eeee"],
+                ", foo bar foo",
+            ],
+            ["[]", [], ""],
+            ["[[], [[], []], [], [{}, {}, {}]]", [[], [[], []], [], [{}, {}, {}]], ""],
+            ['[[1, 2, 3], {"k": 1}, 1e1909]', [[1, 2, 3], {"k": 1}, 1e1909], ""],
+            ["[1, 2, 3]", [1, 2, 3], ""],
+            ["[1, 2, 3]   ", [1, 2, 3], "   "],
+            [
+                '[1, 2, 3, "a", "!", "2"], "key13": {}',
+                [1, 2, 3, "a", "!", "2"],
+                ', "key13": {}',
+            ],
+        ]
+    )
+    def test_parse_array(
+        self, s: str, expected_result: str | None, remaining_str: str
+    ) -> None:
+        js = JsonParser(s)
+        res = js.parse_array()
         self.assertEqual(res, expected_result)
         self.assertEqual(remaining_str, js.s)
 
