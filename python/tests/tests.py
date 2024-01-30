@@ -4,6 +4,7 @@ from parameterized.parameterized import parameterized
 import os
 from pathlib import Path
 from src.json_parser import JsonParser
+from src.errors import JsonParseError
 
 TEST_FILES_PATH = Path(__file__).parent / Path("test_files")
 
@@ -16,7 +17,11 @@ class TestPyLispInterpreter(TestCase):
             ['    {"key1": "value1"}', {"key1": "value1"}, ""],
             ["{}", {}, ""],
             ['    {  "key1"   :    "value1"}', {"key1": "value1"}, ""],
-            ['    \n\n{\n\n    \n\t\t    "key1": "value1"}', {"key1": "value1"}, ""],
+            [
+                '    \n\n{\n\n    \n\t\t    "key1": "value1"}',
+                {"key1": "value1"},
+                "",
+            ],
             ['{"key1": "value1"}', {"key1": "value1"}, ""],
             ['{"key1": 5}', {"key1": 5}, ""],
             ['{"key1": 5, "key2": 12e90}', {"key1": 5, "key2": 12e90}, ""],
@@ -30,7 +35,11 @@ class TestPyLispInterpreter(TestCase):
             ['{"key1": false}', {"key1": False}, ""],
             ['{"key1": true}', {"key1": True}, ""],
             ['{"key1": "true"}', {"key1": "true"}, ""],
-            ['{"key1": "true", "key2": false}', {"key1": "true", "key2": False}, ""],
+            [
+                '{"key1": "true", "key2": false}',
+                {"key1": "true", "key2": False},
+                "",
+            ],
             [
                 '{"key1": "true", "key2": false, "key3": 42, "key4": {}}',
                 {"key1": "true", "key2": False, "key3": 42, "key4": {}},
@@ -82,13 +91,29 @@ class TestPyLispInterpreter(TestCase):
             ['{"key1": 5.5.5..5}'],
             ['{"key1": .5.5.55..}'],
             ['{"key1": +6}'],
+            ['{"key1": +++6}'],
+            ['{"key1": 63232323e43434.009-}'],
+            ['{"key1": 34353434232332.2323232323434989.0}'],
+            ['{"key1": value134"}'],
+            ['{"key1": FALSE}'],
+            ['{"key1": False}'],
+            ['{"key1": True}'],
+            ['{"key1": TRUE}'],
+            ['{"key1": Null}'],
+            ['{"key1": NULL}'],
+            ['{"key1": NaN}'],
+            ['{"key1": nan}'],
+            ['{"key1": none}'],
+            ['{"key1": NONE}'],
         ]
     )
     def test_raise_unable_parse_key_or_value(self, s: str):
         jp = JsonParser(s)
-        with self.assertRaises(SyntaxError) as context:
+        with self.assertRaises(JsonParseError) as context:
             jp.parse_object()
-        self.assertEqual(str(context.exception), "Key or value unable to be parsed.")
+        self.assertEqual(
+            str(context.exception), "Value unable to be parsed: invalid entry."
+        )
 
     @parameterized.expand(
         [
@@ -98,9 +123,11 @@ class TestPyLispInterpreter(TestCase):
     )
     def test_raise_missing_close_quote_error(self, s: str):
         jp = JsonParser(s)
-        with self.assertRaises(SyntaxError) as context:
+        with self.assertRaises(JsonParseError) as context:
             jp.parse_string()
-        self.assertEqual(str(context.exception), "String is missing close quote.")
+        self.assertEqual(
+            str(context.exception), "String is missing close quote."
+        )
 
     @parameterized.expand(
         [
@@ -113,9 +140,11 @@ class TestPyLispInterpreter(TestCase):
     )
     def test_raise_trailing_comma_error(self, s: str):
         jp = JsonParser(s)
-        with self.assertRaises(SyntaxError) as context:
+        with self.assertRaises(JsonParseError) as context:
             jp.parse_object()
-        self.assertEqual(str(context.exception), "Trailing commas are not allowed.")
+        self.assertEqual(
+            str(context.exception), "Trailing commas are not allowed."
+        )
 
     @parameterized.expand(
         [
@@ -152,8 +181,16 @@ class TestPyLispInterpreter(TestCase):
                 ", foo bar foo",
             ],
             ["[]", [], ""],
-            ["[[], [[], []], [], [{}, {}, {}]]", [[], [[], []], [], [{}, {}, {}]], ""],
-            ['[[1, 2, 3], {"k": 1}, 1e1909]', [[1, 2, 3], {"k": 1}, 1e1909], ""],
+            [
+                "[[], [[], []], [], [{}, {}, {}]]",
+                [[], [[], []], [], [{}, {}, {}]],
+                "",
+            ],
+            [
+                '[[1, 2, 3], {"k": 1}, 1e1909]',
+                [[1, 2, 3], {"k": 1}, 1e1909],
+                "",
+            ],
             ["[1, 2, 3]", [1, 2, 3], ""],
             ["[1, 2, 3]   ", [1, 2, 3], "   "],
             [
@@ -359,9 +396,7 @@ class TestPyLispInterpreter(TestCase):
                 },
             ],
             [
-                os.path.join(
-                    TEST_FILES_PATH, "step4/valid3.json"
-                ),  # TODO change this everywhere
+                os.path.join(TEST_FILES_PATH, "step4/valid3.json"),
                 {
                     "key": "value",
                     "key-n": 101,
@@ -386,7 +421,9 @@ class TestPyLispInterpreter(TestCase):
             ],
         ]
     )
-    def test_valid_json_files(self, file_path: str, expected_result: dict) -> None:
+    def test_valid_json_files(
+        self, file_path: str, expected_result: dict
+    ) -> None:
         jp = JsonParser()
         res = jp.parse_json(file_path)
         self.assertEqual(res, expected_result)
@@ -396,14 +433,65 @@ class TestPyLispInterpreter(TestCase):
             [os.path.join(TEST_FILES_PATH, "step2/invalid.json")],
             [os.path.join(TEST_FILES_PATH, "step2/invalid2.json")],
             [os.path.join(TEST_FILES_PATH, "step2/invalid3json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid4json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid5json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid6json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid7json")],
             [os.path.join(TEST_FILES_PATH, "step3/invalid.json")],
             [os.path.join(TEST_FILES_PATH, "step4/invalid.json")],
         ]
     )
     def test_invalid_json_files(self, file_path: str) -> None:
         jp = JsonParser()
-        with self.assertRaises((SyntaxError)):
+        with self.assertRaises(JsonParseError):
             jp.parse_json(file_path)
+
+    @parameterized.expand(
+        [
+            [os.path.join(TEST_FILES_PATH, "step2/invalid2.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid4.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid5.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid6.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid7.json")],
+        ]
+    )
+    def test_invalid_keys_json_files(self, file_path: str) -> None:
+        jp = JsonParser()
+        with self.assertRaises(JsonParseError) as context:
+            jp.parse_json(file_path)
+        self.assertEqual(str(context.exception), "Keys must be valid strings.")
+
+    @parameterized.expand(
+        [
+            [os.path.join(TEST_FILES_PATH, "step2/invalid.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid3.json")],
+        ]
+    )
+    def test_trailing_commas_json_files(self, file_path: str) -> None:
+        jp = JsonParser()
+        with self.assertRaises(JsonParseError) as context:
+            jp.parse_json(file_path)
+        self.assertEqual(
+            str(context.exception), "Trailing commas are not allowed."
+        )
+
+    @parameterized.expand(
+        [
+            [os.path.join(TEST_FILES_PATH, "step3/invalid.json")],
+            [os.path.join(TEST_FILES_PATH, "step4/invalid.json")],
+            [os.path.join(TEST_FILES_PATH, "step4/invalid1.json")],
+            [os.path.join(TEST_FILES_PATH, "step4/invalid2.json")],
+            [os.path.join(TEST_FILES_PATH, "step4/invalid3.json")],
+            [os.path.join(TEST_FILES_PATH, "step4/invalid4.json")],
+        ]
+    )
+    def test_invalid_values_json_files(self, file_path: str) -> None:
+        jp = JsonParser()
+        with self.assertRaises(JsonParseError) as context:
+            jp.parse_json(file_path)
+        self.assertEqual(
+            str(context.exception), "Value unable to be parsed: invalid entry."
+        )
 
 
 if __name__ == "__main__":
