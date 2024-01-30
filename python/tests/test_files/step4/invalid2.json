@@ -1,0 +1,9 @@
+{
+  "key": "value",
+  "key-n": TRUE,
+  "key-o": {
+    "inner key": True
+  },
+  "key-l": ['list value'
+  ]
+}
