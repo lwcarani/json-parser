@@ -1,0 +1,2 @@
+class JsonParseError(Exception):
+    pass
