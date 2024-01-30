@@ -59,7 +59,10 @@ class JsonParser(object):
         self.skip_whitespace()
 
         while self.s[0] != "}":
-            key = self.parse_item()
+            key = (
+                self.parse_item()
+            )  # TODO - this should always be a string - throw error if key comes back None?
+            # what happens when the key is not a string? trace through code!
             self.skip_whitespace()
             self.parse_colon()
             val = self.parse_item()

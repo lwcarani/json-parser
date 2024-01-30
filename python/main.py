@@ -1,6 +1,12 @@
 import argparse
-from json_parser import JsonParser
-from pprint_objects import pprint_dict
+import unittest
+from pathlib import Path
+from src.json_parser import JsonParser
+from src.pprint_objects import pprint_dict
+
+PARENT_OUTPUT_PATH = Path(__file__).parent
+TEST_PATH = PARENT_OUTPUT_PATH / Path("tests")
+
 
 if __name__ == "__main__":
     # Create an ArgumentParser object
@@ -15,8 +21,16 @@ if __name__ == "__main__":
         help="Path to the input file(s). Pass no file to read from user input.",
     )
 
+    parser.add_argument("-t", "--tests", action="store_true", help="Run all tests.")
+
     # Parse the command-line arguments
     args = parser.parse_args()
+
+    if args.tests:
+        loader = unittest.TestLoader()
+        suite = loader.discover(str(TEST_PATH))
+        runner = unittest.TextTestRunner()
+        runner.run(suite)
 
     if len(args.input_files) == 0:
         user_input = []

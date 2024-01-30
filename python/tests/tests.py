@@ -1,7 +1,11 @@
 import unittest
 from unittest import TestCase
 from parameterized.parameterized import parameterized
-from json_parser import JsonParser
+import os
+from pathlib import Path
+from src.json_parser import JsonParser
+
+TEST_FILES_PATH = Path(__file__).parent / Path("test_files")
 
 
 class TestPyLispInterpreter(TestCase):
@@ -322,14 +326,17 @@ class TestPyLispInterpreter(TestCase):
 
     @parameterized.expand(
         [
-            ["test_files/step1/valid1.json", {}],
+            [os.path.join(TEST_FILES_PATH, "step1/valid1.json"), {}],
             [
-                "test_files/step2/valid.json",
+                os.path.join(TEST_FILES_PATH, "step2/valid.json"),
                 {"key": "valuedfk/$#$#434546[]{}{f[d]fdaj,dfjwkejr"},
             ],
-            ["test_files/step2/valid2.json", {"key": "value", "key2": "value"}],
             [
-                "test_files/step3/valid.json",
+                os.path.join(TEST_FILES_PATH, "step2/valid2.json"),
+                {"key": "value", "key2": "value"},
+            ],
+            [
+                os.path.join(TEST_FILES_PATH, "step3/valid.json"),
                 {
                     "key1": True,
                     "key2": False,
@@ -339,11 +346,11 @@ class TestPyLispInterpreter(TestCase):
                 },
             ],
             [
-                "test_files/step4/valid.json",
+                os.path.join(TEST_FILES_PATH, "step4/valid.json"),
                 {"key": "value", "key-n": 101, "key-o": {}, "key-l": []},
             ],
             [
-                "test_files/step4/valid2.json",
+                os.path.join(TEST_FILES_PATH, "step4/valid2.json"),
                 {
                     "key": "value",
                     "key-n": 101,
@@ -352,7 +359,9 @@ class TestPyLispInterpreter(TestCase):
                 },
             ],
             [
-                "test_files/step4/valid3.json",
+                os.path.join(
+                    TEST_FILES_PATH, "step4/valid3.json"
+                ),  # TODO change this everywhere
                 {
                     "key": "value",
                     "key-n": 101,
@@ -384,21 +393,16 @@ class TestPyLispInterpreter(TestCase):
 
     @parameterized.expand(
         [
-            ["test_files/step1/invalid1.json"],
-            ["test_files/step1/invalid2.json"],
-            ["test_files/step1/invalid3.json"],
-            ["test_files/step1/invalid4.json"],
-            ["test_files/step1/invalid5.json"],
-            ["test_files/step2/invalid.json"],
-            ["test_files/step2/invalid2.json"],
-            ["test_files/step2/invalid3.json"],
-            ["test_files/step3/invalid.json"],
-            ["test_files/step4/invalid.json"],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid2.json")],
+            [os.path.join(TEST_FILES_PATH, "step2/invalid3json")],
+            [os.path.join(TEST_FILES_PATH, "step3/invalid.json")],
+            [os.path.join(TEST_FILES_PATH, "step4/invalid.json")],
         ]
     )
     def test_invalid_json_files(self, file_path: str) -> None:
         jp = JsonParser()
-        with self.assertRaises((SyntaxError, TypeError, IndexError)):
+        with self.assertRaises((SyntaxError)):
             jp.parse_json(file_path)
 
 

@@ -1,4 +1,2 @@
-python/__pycache__/
-python/JsonParser/__pycache__/
-python/JsonParser/tests/__pycache__/
-python/JsonParser/src/__pycache__/
+__pycache__/
+*.pyc
