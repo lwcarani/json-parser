@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from src.errors import JsonParseError
 
 WHITESPACE = [" ", "\n", "\t", "\r"]
 
@@ -39,7 +40,7 @@ class JsonParser(object):
         # if we encounter a closing bracket immediately
         # following a comma, the JSON is invalid
         if self.s[0] == "}":
-            raise SyntaxError("Trailing commas are not allowed.")
+            raise JsonParseError("Trailing commas are not allowed.")
 
     def parse_colon(self):
         if self.s[0] != ":":
@@ -59,10 +60,9 @@ class JsonParser(object):
         self.skip_whitespace()
 
         while self.s[0] != "}":
-            key = (
-                self.parse_item()
-            )  # TODO - this should always be a string - throw error if key comes back None?
-            # what happens when the key is not a string? trace through code!
+            key = self.parse_string()
+            if key is None:
+                raise JsonParseError("Keys must be valid strings.")
             self.skip_whitespace()
             self.parse_colon()
             val = self.parse_item()
@@ -111,7 +111,7 @@ class JsonParser(object):
 
             # no closing quotation encountered, invalid JSON format
             if self.ptr >= len(self.s):
-                raise SyntaxError("String is missing close quote.")
+                raise JsonParseError("String is missing close quote.")
 
         # advance ptr on input string json
         self.s = self.s[self.ptr + 1 :]
@@ -180,7 +180,7 @@ class JsonParser(object):
         if item is None:
             item = self.parse_array()
         if item is None:
-            raise SyntaxError("Key or value unable to be parsed.")
+            raise JsonParseError("Value unable to be parsed: invalid entry.")
 
         return item
 
@@ -189,6 +189,8 @@ class JsonParser(object):
             f = open(s, "r")
             self.s = f.read()
             f.close()
+        elif len(s) == 0:
+            raise JsonParseError("Empty JSON file detected: invalid entry.")
         else:
             self.s = s
 
