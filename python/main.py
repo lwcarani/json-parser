@@ -21,7 +21,9 @@ if __name__ == "__main__":
         help="Path to the input file(s). Pass no file to read from user input.",
     )
 
-    parser.add_argument("-t", "--tests", action="store_true", help="Run all tests.")
+    parser.add_argument(
+        "-t", "--tests", action="store_true", help="Run all tests."
+    )
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -34,6 +36,8 @@ if __name__ == "__main__":
 
     if len(args.input_files) == 0:
         user_input = []
+        print("No input file detected.")
+        print("Manually enter the JSON file you would like to parse: ")
         user_input.append(input())
     else:
         user_input: list = args.input_files
