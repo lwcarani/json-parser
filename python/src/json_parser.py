@@ -16,10 +16,10 @@ class JsonParser(object):
         self.ptr = 0
         self.s = s
 
-    def reset_ptr(self):
+    def reset_ptr(self) -> None:
         self.ptr = 0
 
-    def skip_whitespace(self):
+    def skip_whitespace(self) -> None:
         for char in self.s:
             if char in WHITESPACE:
                 self.ptr += 1
@@ -30,7 +30,7 @@ class JsonParser(object):
 
         self.reset_ptr()
 
-    def parse_comma(self):
+    def parse_comma(self) -> None:
         if self.s[0] != ",":
             return
 
@@ -42,14 +42,14 @@ class JsonParser(object):
         if self.s[0] == "}":
             raise JsonParseError("Trailing commas are not allowed.")
 
-    def parse_colon(self):
+    def parse_colon(self) -> None:
         if self.s[0] != ":":
             return
 
         self.s = self.s[1:]
         self.skip_whitespace()
 
-    def parse_object(self):
+    def parse_object(self) -> dict | None:
         res = {}
         self.skip_whitespace()
 
@@ -75,7 +75,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_array(self):
+    def parse_array(self) -> list | None:
         res = []
         self.skip_whitespace()
 
@@ -96,7 +96,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_string(self):
+    def parse_string(self) -> str | None:
         res = ""
 
         if self.s[0] != '"':
@@ -120,7 +120,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_reserved_word(self):
+    def parse_reserved_word(self) -> bool | str | None:
         if self.s[:4] == ReservedWords.TRUE.value:
             self.s = self.s[len(ReservedWords.TRUE.value) :]
             return True
@@ -133,7 +133,7 @@ class JsonParser(object):
         else:
             return
 
-    def parse_number(self):
+    def parse_number(self) -> int | float | None:
         res = ""
         first_char = self.s[0]
         e_or_dot_counter = 0
@@ -168,7 +168,7 @@ class JsonParser(object):
         self.reset_ptr()
         return int(float(res)) if float(res) % 1 == 0 else float(res)
 
-    def parse_item(self):
+    def parse_item(self) - > int | float | str | bool | list | dict | None:
         item = self.parse_string()
 
         if item is None:
