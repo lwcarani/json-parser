@@ -36,6 +36,8 @@ class JsonParser(object):
         self.s = self.s[1:]
         self.skip_whitespace()
 
+        # if we encounter a closing bracket immediately
+        # following a comma, the JSON is invalid
         if self.s[0] == "}":
             raise SyntaxError("Trailing commas are not allowed.")
 
@@ -104,7 +106,7 @@ class JsonParser(object):
             res += char
             self.ptr += 1
 
-            # haven't encountered close quotes, return None
+            # no closing quotation encountered, invalid JSON format
             if self.ptr >= len(self.s):
                 raise SyntaxError("String is missing close quote.")
 
@@ -137,6 +139,8 @@ class JsonParser(object):
         if not first_char.isdigit() and first_char != "-":
             return
 
+        # parse one char at a time until the string 's' is empty,
+        # or until we trigger a reason to break or return 'None'
         for char in self.s:
             if char.isdigit():
                 res += char
@@ -150,15 +154,13 @@ class JsonParser(object):
                 neg_counter += 1
                 self.ptr += 1
             elif char in WHITESPACE + ["}", ",", "]"]:
-                # advance ptr on input string json
-                self.s = self.s[self.ptr :]
-                self.reset_ptr()
-                return int(float(res)) if float(res) % 1 == 0 else float(res)
+                # end of number encountered, break and return the number
+                break
             else:
                 self.reset_ptr()
                 return
 
-        # advance ptr on input string json
+        # advance ptr on input string
         self.s = self.s[self.ptr :]
         self.reset_ptr()
         return int(float(res)) if float(res) % 1 == 0 else float(res)
