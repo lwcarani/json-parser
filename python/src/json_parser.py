@@ -12,7 +12,7 @@ class ReservedWords(Enum):
 
 
 class JsonParser(object):
-    def __init__(self, s: str = ""):
+    def __init__(self, s: str = "") -> None:
         self.ptr = 0
         self.s = s
 
@@ -49,7 +49,7 @@ class JsonParser(object):
         self.s = self.s[1:]
         self.skip_whitespace()
 
-    def parse_object(self) -> dict | None:
+    def parse_object(self) -> None | dict:
         res = {}
         self.skip_whitespace()
 
@@ -75,7 +75,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_array(self) -> list | None:
+    def parse_array(self) -> None | list:
         res = []
         self.skip_whitespace()
 
@@ -96,7 +96,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_string(self) -> str | None:
+    def parse_string(self) -> None | str:
         res = ""
 
         if self.s[0] != '"':
@@ -120,7 +120,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_reserved_word(self) -> bool | str | None:
+    def parse_reserved_word(self) -> None | str | bool:
         if self.s[:4] == ReservedWords.TRUE.value:
             self.s = self.s[len(ReservedWords.TRUE.value) :]
             return True
@@ -133,7 +133,7 @@ class JsonParser(object):
         else:
             return
 
-    def parse_number(self) -> int | float | None:
+    def parse_number(self) -> None | int | float:
         res = ""
         first_char = self.s[0]
         e_or_dot_counter = 0
@@ -168,7 +168,7 @@ class JsonParser(object):
         self.reset_ptr()
         return int(float(res)) if float(res) % 1 == 0 else float(res)
 
-    def parse_item(self) -> int | float | str | bool | list | dict | None:
+    def parse_item(self) -> None | int | float | str | bool | list | dict:
         item = self.parse_string()
 
         if item is None:
@@ -189,12 +189,19 @@ class JsonParser(object):
             f = open(s, "r")
             self.s = f.read()
             f.close()
-        elif len(s) == 0:
-            raise JsonParseError("Empty JSON file detected: invalid entry.")
         else:
             self.s = s
 
         self.skip_whitespace()
-        res = self.parse_item()
+
+        # do basic checks before parsing
+        if len(self.s) == 0:
+            raise JsonParseError("Empty JSON file detected: invalid entry.")
+        if self.s[0] != "{":
+            raise JsonParseError(
+                'JSON file is missing starting "{": invalid entry.'
+            )
+
+        res: dict = self.parse_object()
 
         return res
