@@ -168,7 +168,7 @@ class JsonParser(object):
         self.reset_ptr()
         return int(float(res)) if float(res) % 1 == 0 else float(res)
 
-    def parse_item(self) - > int | float | str | bool | list | dict | None:
+    def parse_item(self) -> int | float | str | bool | list | dict | None:
         item = self.parse_string()
 
         if item is None:
