@@ -346,6 +346,7 @@ class TestPyLispInterpreter(TestCase):
             ['-213431e9, "key2": ', -213431e9, ', "key2": '],
             ["1445e93232", 1445e93232, ""],
             ["-121e9", -121e9, ""],
+            ['-121e9, "k": "value", ...}', -121e9, ', "k": "value", ...}'],
             [
                 '"valuedfk/$#$#434546[]{}{f[d]fdaj,dfjwkejr"',
                 "valuedfk/$#$#434546[]{}{f[d]fdaj,dfjwkejr",
@@ -422,10 +423,10 @@ class TestPyLispInterpreter(TestCase):
         ]
     )
     def test_valid_json_files(
-        self, file_path: str, expected_result: dict
+        self, file_path_or_str: str, expected_result: dict
     ) -> None:
         jp = JsonParser()
-        res = jp.parse_json(file_path)
+        res = jp.parse_json(file_path_or_str)
         self.assertEqual(res, expected_result)
 
     @parameterized.expand(
@@ -473,6 +474,50 @@ class TestPyLispInterpreter(TestCase):
             jp.parse_json(file_path)
         self.assertEqual(
             str(context.exception), "Trailing commas are not allowed."
+        )
+
+    @parameterized.expand(
+        [
+            [os.path.join(TEST_FILES_PATH, "step1/invalid.json")],
+        ]
+    )
+    def test_missing_starting_open_bracket_json_files(
+        self, file_path: str
+    ) -> None:
+        jp = JsonParser()
+        with self.assertRaises(JsonParseError) as context:
+            jp.parse_json(file_path)
+        self.assertEqual(
+            str(context.exception),
+            'JSON file is missing starting "{": invalid entry.',
+        )
+
+    @parameterized.expand(
+        [
+            [os.path.join(TEST_FILES_PATH, "step1/invalid2.json")],
+        ]
+    )
+    def test_empty_json_file(self, file_path: str) -> None:
+        jp = JsonParser()
+        with self.assertRaises(JsonParseError) as context:
+            jp.parse_json(file_path)
+        self.assertEqual(
+            str(context.exception),
+            "Empty JSON file detected: invalid entry.",
+        )
+
+    @parameterized.expand(
+        [
+            [os.path.join(TEST_FILES_PATH, "step4/invalid5.json")],
+        ]
+    )
+    def test_no_closing_bracket_json(self, file_path: str) -> None:
+        jp = JsonParser()
+        with self.assertRaises(JsonParseError) as context:
+            jp.parse_json(file_path)
+        self.assertEqual(
+            str(context.exception),
+            "Value unable to be parsed: invalid entry.",
         )
 
     @parameterized.expand(
