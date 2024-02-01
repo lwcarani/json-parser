@@ -32,10 +32,10 @@ No input file detected.
 Manually type the JSON object you would like to parse:
 > { "key1": "value1", "key2": {"inner key": 42} }
 {
-    "key1": "value1"
+    "key1": "value1",
     "key2": {
-        "inner key": 42
-    }
+        "inner key": 42,
+    },
 }
 0
 ```
@@ -61,9 +61,9 @@ No input file detected.
 Manually type the JSON object you would like to parse:
 > { "key1": true, "key2": false, "key3": 1e10 }
 {
-    "key1": True
-    "key2": False
-    "key3": 10000000000
+    "key1": True,
+    "key2": False,
+    "key3": 10000000000,
 }
 0
 ```
@@ -99,11 +99,43 @@ Ran 180 tests in 0.119s
 
 OK
 {
-    "key1": True
-    "key2": False
-    "key3": "null"
-    "key4": "value"
-    "key5": 101
+    "key1": True,
+    "key2": False,
+    "key3": "null",
+    "key4": "value",
+    "key5": 101,
+}
+0
+```
+Or, you can just parse a single JSON file:
+```cmd
+C:\> jp step4/valid3.json
+{
+    "key": "value",
+    "key-n": 101,
+    "key-o": {
+        "inner key": "inner value",
+        "inner key 2": 42,
+        "inner key 3": {
+            "inner inner key": 17,
+        },
+    },
+    "key-l": [
+        "list value",
+        1,
+        2,
+        3,
+        [
+            "a",
+            "b",
+            "c",
+        ],
+        42,
+        14,
+        False,
+        True,
+        "null",
+    ],
 }
 0
 ```
@@ -111,31 +143,31 @@ And finally, you can pass in multiple JSON files to parse:
 ```cmd
 C:\> jp step3/valid.json step4/valid2.json step4/valid.json
 {
-    "key1": True
-    "key2": False
-    "key3": "null"
-    "key4": "value"
-    "key5": 101
+    "key1": True,
+    "key2": False,
+    "key3": "null",
+    "key4": "value",
+    "key5": 101,
 }
 0
 {
-    "key": "value"
-    "key-n": 101
+    "key": "value",
+    "key-n": 101,
     "key-o": {
-        "inner key": "inner value"
-    }
-    "key-l":     [
-        "list value"
-    ]
+        "inner key": "inner value",
+    },
+    "key-l": [
+        "list value",
+    ],
 }
 0
 {
-    "key": "value"
-    "key-n": 101
+    "key": "value",
+    "key-n": 101,
     "key-o": {
-    }
-    "key-l":     [
-    ]
+    },
+    "key-l": [
+    ],
 }
 0
 ```
