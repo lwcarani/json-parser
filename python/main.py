@@ -37,7 +37,7 @@ if __name__ == "__main__":
     if len(args.input_files) == 0:
         user_input = []
         print("No input file detected.")
-        print("Manually enter the JSON file you would like to parse: ")
+        print("Manually type the JSON object you would like to parse: ")
         user_input.append(input())
     else:
         user_input: list = args.input_files
