@@ -90,7 +90,7 @@ No input file detected.
 Manually type the JSON object you would like to parse:
 > 
 ```
-You can run tests, and pass a path to the JSON file you want to parse:
+You can run tests, and provide a path to the JSON file you want to parse:
 ```cmd
 C:\> jp --tests step3/valid.json
 ....................................................................................................................................................................................
