@@ -1,7 +1,7 @@
 # json-parser
 
 ## About
-`json-parser` is a command line JSON parser written in Python. Running `jp` from the command line will allow the user to enter the Lisp REPL environment, or execute a .txt file from a provided file path. 
+`json-parser` is a command line JSON parser written in Python. Running `jp` from the command line will allow the user to parse a JSON file from a provided file path, or manually type a JSON object in the command line to be parsed. Successful parsing returns `0`, unsuccessful parsing returns `1` along with an error message. 
 
 ## Instructions
 For Windows, create a folder named `Aliases` in your C drive: `C:/Aliases`. Add this folder to PATH. Next, create a batch file that will execute when you call the specified alias. For example, on my machine, I have a batch file named `jp.bat` located at `C:/Aliases`, that contains the following script:
