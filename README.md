@@ -24,7 +24,7 @@ No input file detected.
 Manually type the JSON object you would like to parse:
 >
 ```
-So now, the user can type in a JSON object, and the program will return `1` if JSON object was unable to be parsed (and print an error message), or the program will return `0` if the JSON object was able to be parsed, and print the resulting JSON object:
+So now, the user can type in a JSON object, and the program will return `1` if the JSON object was unable to be parsed (and print an error message), or the program will return `0` if the JSON object was able to be parsed, and print the resulting JSON object:
 
 ```cmd
 C:\> jp
@@ -90,7 +90,7 @@ No input file detected.
 Manually type the JSON object you would like to parse:
 > 
 ```
-You can run tests, and pass a path to JSON file you want to parse:
+You can run tests, and pass a path to the JSON file you want to parse:
 ```cmd
 C:\> jp --tests step3/valid.json
 ....................................................................................................................................................................................
