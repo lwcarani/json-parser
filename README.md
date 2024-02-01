@@ -139,6 +139,17 @@ C:\> jp step3/valid.json step4/valid2.json step4/valid.json
 }
 0
 ```
+```cmd
+C:\> jp step1/invalid.json step2/invalid2.json step3/invalid.json step4/invalid.json
+JSON file is missing starting "{": invalid entry.
+1
+Keys must be valid strings.
+1
+Value unable to be parsed: invalid entry.
+1
+Value unable to be parsed: invalid entry.
+1
+```
 
 ## Acknowledgements
 Thanks to [John Crickett](https://github.com/JohnCrickett) for the idea from his site, [Coding Challenges](https://codingchallenges.fyi/challenges/challenge-json-parser)!
