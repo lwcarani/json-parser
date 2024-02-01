@@ -1,41 +1,146 @@
 # json-parser
 
 ## About
-`json-parser` is a ..., written in Python. Running `pylisp` from the command line will allow the user to enter the Lisp REPL environment, or execute a .txt file from a provided file path. 
+`json-parser` is a command line JSON parser written in Python. Running `jp` from the command line will allow the user to enter the Lisp REPL environment, or execute a .txt file from a provided file path. 
+
+## Instructions
+For Windows, create a folder named `Aliases` in your C drive: `C:/Aliases`. Add this folder to PATH. Next, create a batch file that will execute when you call the specified alias. For example, on my machine, I have a batch file named `jp.bat` located at `C:/Aliases`, that contains the following script:
+
+```bat
+@echo off
+echo.
+python C:\...\json-parser\python\main.py %*
+```
+
+So now, when I type `jp` in the command prompt, this batch file will execute, which in turn runs the `json-parser` Python script.
 
 ## Examples
 
-Running `pylisp` from the command line launches a cli option to enter the REPL environment or execute a local file:
+Running `jp` from the command line with no input file specified prompts the user to manually input a JSON object to parse:
 
 ```cmd
-C:\> pylisp
+C:\> jp
+No input file detected.
+Manually type the JSON object you would like to parse:
+>
+```
+So now, the user can type in a JSON object, and the program will return `1` if JSON object was unable to be parsed (and print an error message), or the program will return `0` if the JSON object was able to be parsed, and print the resulting JSON object:
 
-[?] Would you like to open the REPL environment, or execute a file?: file
- > file
-   REPL
+```cmd
+C:\> jp
+No input file detected.
+Manually type the JSON object you would like to parse:
+> { "key1": "value1", "key2": {"inner key": 42} }
+{
+    "key1": "value1"
+    "key2": {
+        "inner key": 42
+    }
+}
+0
+```
+```cmd
+C:\> jp
+No input file detected.
+Manually type the JSON object you would like to parse:
+> { "key1": "value1", "key2": "value2", }
+Trailing commas are not allowed.
+1
+```
+```cmd
+C:\> jp
+No input file detected.
+Manually type the JSON object you would like to parse:
+> { "key1": "value1", key2: "value2" }
+Keys must be valid strings.
+1
+```
+```cmd
+C:\> jp
+No input file detected.
+Manually type the JSON object you would like to parse:
+> { "key1": true, "key2": false, "key3": 1e10 }
+{
+    "key1": True
+    "key2": False
+    "key3": 10000000000
+}
+0
+```
+You can also pass in a `-t` or `--tests` flag to run the test suite:
+```cmd
+C:\> jp -t
+....................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 180 tests in 0.118s
 
-Enter the location of the file: test_script.txt
-Defined function: HELLO
-Defined function: MEANING_OF_LIFE
-Defined function: MEANING_OF_LIFE_ANSWER
-Defined function: DOUBLEN
-Defined function: FIB
-Defined function: FACT
-Hello Coding Challenge World
-42
-The meaning of life is 42
-The double of 5 is 10
-The double of 21 is 42
-The double of 107 is 214
-Factorial of 5 is 120
-Factorial of 6 is 720
-Factorial of 7 is 5040
-Factorial of 10 is 3628800
-Factorial of 12 is 479001600
-The 7th number of the Fibonacci sequence is 13
+OK
+No input file detected.
+Manually type the JSON object you would like to parse:
+> 
+```
+```cmd
+C:\> jp --tests
+....................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 180 tests in 0.118s
+
+OK
+No input file detected.
+Manually type the JSON object you would like to parse:
+> 
+```
+You can run tests, and pass a path to JSON file you want to parse:
+```cmd
+C:\> jp --tests step3/valid.json
+....................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 180 tests in 0.119s
+
+OK
+{
+    "key1": True
+    "key2": False
+    "key3": "null"
+    "key4": "value"
+    "key5": 101
+}
+0
+```
+And finally, you can pass in multiple JSON files to parse:
+```cmd
+C:\> jp step3/valid.json step4/valid2.json step4/valid.json
+{
+    "key1": True
+    "key2": False
+    "key3": "null"
+    "key4": "value"
+    "key5": 101
+}
+0
+{
+    "key": "value"
+    "key-n": 101
+    "key-o": {
+        "inner key": "inner value"
+    }
+    "key-l":     [
+        "list value"
+    ]
+}
+0
+{
+    "key": "value"
+    "key-n": 101
+    "key-o": {
+    }
+    "key-l":     [
+    ]
+}
+0
 ```
 
 ## Acknowledgements
-Thanks to [John Crickett](https://github.com/JohnCrickett) for the idea from his site, [Coding Challenges](https://codingchallenges.substack.com/p/coding-challenge-2)!
+Thanks to [John Crickett](https://github.com/JohnCrickett) for the idea from his site, [Coding Challenges](https://codingchallenges.fyi/challenges/challenge-json-parser)!
 
 Feedback, bug reports, issues, and pull requests welcome!
