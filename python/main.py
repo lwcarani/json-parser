@@ -4,8 +4,7 @@ from pathlib import Path
 from src.json_parser import JsonParser
 from src.pprint_objects import pprint_dict
 
-PARENT_OUTPUT_PATH = Path(__file__).parent
-TEST_PATH = PARENT_OUTPUT_PATH / Path("tests")
+TEST_PATH = Path(__file__).parent / Path("tests")
 
 
 if __name__ == "__main__":
@@ -21,9 +20,7 @@ if __name__ == "__main__":
         help="Path to the input file(s). Pass no file to read from user input.",
     )
 
-    parser.add_argument(
-        "-t", "--tests", action="store_true", help="Run all tests."
-    )
+    parser.add_argument("-t", "--tests", action="store_true", help="Run all tests.")
 
     # Parse the command-line arguments
     args = parser.parse_args()
