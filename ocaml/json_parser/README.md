@@ -1,7 +1,7 @@
 # json_parser
 
 ## About
-`json_parser` is a command line JSON parser written in OCaml. To build it, I used [Menhir](http://cristal.inria.fr/~fpottier/menhir/manual.pdf) - the standard parser generator for OCaml - and [ocamllex](https://ocaml.org/manual/5.2/lexyacc.html#s%3Aocamllex-overview) - the standard lexer generator for OCaml. Menhir and ocamllex were built to be used together, which makes them very easy to work with. After first building a JSON parser in Python, I chose to implement another JSON parser in OCaml because it's a great language for writing compilers - and learning Menhir and ocamllex is my first foray into the compiler world. 
+`json_parser` is a command line JSON parser written in OCaml. To build it, I used [Menhir](https://gallium.inria.fr/~fpottier/menhir/) - the standard parser generator for OCaml - and [ocamllex](https://ocaml.org/manual/5.2/lexyacc.html#s%3Aocamllex-overview) - the standard lexer generator for OCaml. Menhir and ocamllex were built to be used together, which makes them very easy to work with. After first building a JSON parser in Python, I chose to implement another JSON parser in OCaml because it's a great language for writing compilers - and learning Menhir and ocamllex is my first foray into the compiler world. 
 
 I have `ocaml-base-compiler.5.0.0` installed on my windows machine, and specifically, I'm using Ubuntu on Windows Subsystem for Linux (WSL). I also have opam (OCaml's package manager) and dune (OCaml's build system) installed. 
 
