@@ -1,1 +1,1 @@
-This repo contains two implementations of JSON parsers. One in [Python](), one in [OCaml](). Click the links to navigate to their respective README files. 
+This repo contains two implementations of JSON parsers. One in [Python](https://github.com/lwcarani/json-parser/blob/main/python/README.md), one in [OCaml](https://github.com/lwcarani/json-parser/blob/main/ocaml/json_parser/README.md). Click the links to navigate to their respective README files. 
