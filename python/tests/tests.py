@@ -196,11 +196,11 @@ class TestPyLispInterpreter(TestCase):
             ],
         ]
     )
-    def test_parse_array(
+    def test_parse_list(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
         jp = JsonParser(s)
-        res = jp.parse_array()
+        res = jp.parse_list()
         self.assertEqual(res, expected_result)
         self.assertEqual(remaining_str, jp.s)
 

@@ -77,7 +77,7 @@ class JsonParser(object):
 
         return res
 
-    def parse_array(self) -> None | list:
+    def parse_list(self) -> None | list:
         res = []
         self.skip_whitespace()
 
@@ -180,7 +180,7 @@ class JsonParser(object):
         if item is None:
             item = self.parse_object()
         if item is None:
-            item = self.parse_array()
+            item = self.parse_list()
         if item is None:
             raise JsonParseError("Value unable to be parsed: invalid entry.")
 
