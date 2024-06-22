@@ -1,0 +1,3 @@
+(executable
+ (name parser_test)
+ (libraries ounit2 json_parser))

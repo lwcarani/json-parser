@@ -1,0 +1,22 @@
+{
+    "a": 1,
+    "b": 12e43,
+    "hello": "world",
+    "true_key": true,
+    "false_key": false,
+    "null_key": null,
+    "nested_json": {
+        "foobar": "bar",
+        "foobaz": "baz",
+        "foo": 42,
+        "foo_empty": {}
+    },
+    "list": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        42
+    ]
+}
