@@ -65,7 +65,9 @@ class JsonParser(object):
                 raise JsonParseError("Keys must be valid strings.")
             self.skip_whitespace()
             self.parse_colon()
-            val = self.parse_item()
+            # now that we've successfully parsed a key and colon,
+            # parse the corresponding value for this key
+            val = self.parse_value()
             self.skip_whitespace()
             self.parse_comma()
             res[key] = val
@@ -86,7 +88,7 @@ class JsonParser(object):
         self.skip_whitespace()
 
         while self.s[0] != "]":
-            elem = self.parse_item()
+            elem = self.parse_value()
             self.skip_whitespace()
             self.parse_comma()
             res.append(elem)
@@ -168,7 +170,7 @@ class JsonParser(object):
         self.reset_ptr()
         return int(float(res)) if float(res) % 1 == 0 else float(res)
 
-    def parse_item(self) -> None | int | float | str | bool | list | dict:
+    def parse_value(self) -> None | int | float | str | bool | list | dict:
         item = self.parse_string()
 
         if item is None:
@@ -198,9 +200,7 @@ class JsonParser(object):
         if len(self.s) == 0:
             raise JsonParseError("Empty JSON file detected: invalid entry.")
         if self.s[0] != "{":
-            raise JsonParseError(
-                'JSON file is missing starting "{": invalid entry.'
-            )
+            raise JsonParseError('JSON file is missing starting "{": invalid entry.')
 
         res: dict = self.parse_object()
 

@@ -125,9 +125,7 @@ class TestPyLispInterpreter(TestCase):
         jp = JsonParser(s)
         with self.assertRaises(JsonParseError) as context:
             jp.parse_string()
-        self.assertEqual(
-            str(context.exception), "String is missing close quote."
-        )
+        self.assertEqual(str(context.exception), "String is missing close quote.")
 
     @parameterized.expand(
         [
@@ -142,9 +140,7 @@ class TestPyLispInterpreter(TestCase):
         jp = JsonParser(s)
         with self.assertRaises(JsonParseError) as context:
             jp.parse_object()
-        self.assertEqual(
-            str(context.exception), "Trailing commas are not allowed."
-        )
+        self.assertEqual(str(context.exception), "Trailing commas are not allowed.")
 
     @parameterized.expand(
         [
@@ -354,11 +350,11 @@ class TestPyLispInterpreter(TestCase):
             ],
         ]
     )
-    def test_parse_item(
+    def test_parse_value(
         self, s: str, expected_result: str | None, remaining_str: str
     ) -> None:
         jp = JsonParser(s)
-        res = jp.parse_item()
+        res = jp.parse_value()
         self.assertEqual(res, expected_result)
         self.assertEqual(remaining_str, jp.s)
 
@@ -472,18 +468,14 @@ class TestPyLispInterpreter(TestCase):
         jp = JsonParser()
         with self.assertRaises(JsonParseError) as context:
             jp.parse_json(file_path)
-        self.assertEqual(
-            str(context.exception), "Trailing commas are not allowed."
-        )
+        self.assertEqual(str(context.exception), "Trailing commas are not allowed.")
 
     @parameterized.expand(
         [
             [os.path.join(TEST_FILES_PATH, "step1/invalid.json")],
         ]
     )
-    def test_missing_starting_open_bracket_json_files(
-        self, file_path: str
-    ) -> None:
+    def test_missing_starting_open_bracket_json_files(self, file_path: str) -> None:
         jp = JsonParser()
         with self.assertRaises(JsonParseError) as context:
             jp.parse_json(file_path)
