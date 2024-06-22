@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+
+ocaml/json_parser/_build/
