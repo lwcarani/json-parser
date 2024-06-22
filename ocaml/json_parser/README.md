@@ -1,7 +1,7 @@
 # json_parser
 
 ## About
-`json_parser` is a command line JSON parser written in OCaml. To build it, I used [Menhir](http://cristal.inria.fr/~fpottier/menhir/manual.pdf) - the standard parser generator for OCaml - and [ocamllex](https://ocaml.org/manual/5.2/lexyacc.html#s%3Aocamllex-overview) - the standard lexer generator for OCaml. Menhir and ocamllex were built to be used together, which makes them very easy to work with. After first building a JSON parser in Python, I chose to implement another JSON parser in OCaml because it's a great langugae for writing compilers - and learning Menhir and ocamllex is my first foray into the compiler world. 
+`json_parser` is a command line JSON parser written in OCaml. To build it, I used [Menhir](http://cristal.inria.fr/~fpottier/menhir/manual.pdf) - the standard parser generator for OCaml - and [ocamllex](https://ocaml.org/manual/5.2/lexyacc.html#s%3Aocamllex-overview) - the standard lexer generator for OCaml. Menhir and ocamllex were built to be used together, which makes them very easy to work with. After first building a JSON parser in Python, I chose to implement another JSON parser in OCaml because it's a great language for writing compilers - and learning Menhir and ocamllex is my first foray into the compiler world. 
 
 I have `ocaml-base-compiler.5.0.0` installed on my windows machine, and specifically, I'm using Ubuntu on Windows Subsystem for Linux (WSL). I also have opam (OCaml's package manager) and dune (OCaml's build system) installed. 
 
@@ -157,7 +157,7 @@ The second rule named `value` has productions for all the possible value types w
 - The fifth production, `s = STRING`, says to match a STRING token, bind the resulting OCaml `string` value to `s`, and return `String s`. 
 - The sixth, seventh, and eighth productions match a `TRUE`, `FALSE`, or `NULL` token and return the corresponding type.
 
-We also need to define what `obj_values` and `lst_values` are. `obj_values` are a list of `obj_value` separated by commas, where an `obj_value` is a key/value pair, separated by a colon, where the key is a `STRING` and the value is a `value`. `lst_values` are a list of `value` separted by commas.
+We also need to define what `obj_values` and `lst_values` are. `obj_values` are a list of `obj_value` separated by commas, where an `obj_value` is a key/value pair, separated by a colon, where the key is a `STRING` and the value is a `value`. `lst_values` are a list of `value` separated by commas.
 
 ```ocaml
 value: 

@@ -8,4 +8,11 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
+    "cSpell.words": [
+        "lexbuf",
+        "Naur",
+        "nonterminal",
+        "ocamllex",
+        "opam"
+    ],
 }
